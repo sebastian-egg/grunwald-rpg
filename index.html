@@ -3,339 +3,79 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0b0d0a">
+<meta name="theme-color" content="#080a08">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Grünwald RPG">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Grünwald RPG</title>
 <style>
-:root{
- --gold:#e6c166; --panel:rgba(11,14,12,.82); --line:rgba(230,193,102,.32);
-}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090b08;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}
-body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080a08;color:white;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
-#hud{position:fixed;left:10px;top:calc(8px + env(safe-area-inset-top));width:226px;background:linear-gradient(180deg,rgba(21,25,22,.95),rgba(7,9,8,.86));padding:10px 11px;border-radius:16px;border:1px solid var(--line);box-shadow:0 6px 20px rgba(0,0,0,.36)}
-#hud strong{font-size:15px;letter-spacing:.1px}
-.bar{height:12px;background:#141615;border-radius:999px;overflow:hidden;margin-top:6px;border:1px solid rgba(255,255,255,.07)}
-.fill{height:100%;width:100%;transition:width .15s linear}
-.hp{background:linear-gradient(90deg,#9b181d,#dd3f34)}
-.xp{background:linear-gradient(90deg,#6b3d9f,#a260d4)}
-.small{font-size:11px;opacity:.92;margin-top:6px}
-#portrait{float:left;width:45px;height:45px;border-radius:50%;margin-right:8px;background:radial-gradient(circle at 35% 30%,#5670a4,#17233a 70%);border:2px solid #b99b4e;display:grid;place-items:center;font-size:24px}
-#quest{position:fixed;right:10px;top:calc(8px + env(safe-area-inset-top));width:170px;background:linear-gradient(180deg,rgba(21,25,22,.95),rgba(7,9,8,.86));padding:10px;border-radius:15px;font-size:12px;border:1px solid var(--line);box-shadow:0 6px 20px rgba(0,0,0,.28)}
-#quest b{color:#f0ca5a;font-size:13px}
-#toast{position:fixed;left:50%;bottom:196px;transform:translateX(-50%);background:rgba(0,0,0,.82);padding:10px 14px;border-radius:10px;font-size:13px;opacity:0;transition:.18s;max-width:86vw;text-align:center;border:1px solid rgba(255,255,255,.1)}
-#joy{position:fixed;left:18px;bottom:calc(92px + env(safe-area-inset-bottom));width:126px;height:126px;border-radius:50%;background:radial-gradient(circle at 45% 45%,rgba(55,65,56,.52),rgba(11,13,11,.55));border:2px solid rgba(211,188,128,.28);box-shadow:inset 0 0 25px rgba(0,0,0,.45)}
-#joy:before,#joy:after{content:"";position:absolute;background:rgba(255,255,255,.08)}
-#joy:before{width:2px;height:74px;left:61px;top:25px}
-#joy:after{height:2px;width:74px;left:25px;top:61px}
-#knob{position:absolute;width:50px;height:50px;border-radius:50%;left:36px;top:36px;background:radial-gradient(circle at 35% 30%,#8a9488,#4e564f 72%);border:1px solid rgba(255,255,255,.28);box-shadow:0 5px 14px rgba(0,0,0,.45)}
-#abilities{position:fixed;right:17px;bottom:calc(95px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:13px}
-.ability{width:76px;height:76px;border-radius:50%;border:2px solid rgba(227,203,128,.38);color:#fff;font-weight:800;font-size:10px;text-shadow:0 1px 2px #000;box-shadow:0 6px 18px rgba(0,0,0,.38), inset 0 0 18px rgba(255,255,255,.09)}
-#whirl{background:radial-gradient(circle at 35% 30%,#ffb42d,#bf4e14 48%,#5e150d 78%)}
-#charge{background:radial-gradient(circle at 35% 30%,#69c4ff,#2166d9 48%,#14295f 78%)}
-#nav{position:fixed;left:0;right:0;bottom:0;height:calc(78px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);display:grid;grid-template-columns:1fr 1fr 1fr;background:linear-gradient(180deg,rgba(11,12,11,.95),rgba(3,4,3,.98));border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(0,0,0,.28)}
-.navbtn{background:none;border:0;color:#fff;font-size:12px;font-weight:700}
-.navbtn span{display:block;font-size:25px;margin-bottom:4px;filter:drop-shadow(0 2px 2px #000)}
-#panel{position:fixed;inset:7% 5% 11%;background:linear-gradient(180deg,#141814,#090b09);border:1px solid var(--line);border-radius:18px;padding:16px;display:none;overflow:auto;z-index:10;box-shadow:0 12px 40px rgba(0,0,0,.6)}
-#close{position:sticky;float:right;top:0;width:35px;height:35px;border:0;border-radius:50%;background:#3a3e3a;color:#fff;font-size:20px}
-.item{padding:11px;margin:8px 0;background:linear-gradient(180deg,#252b25,#171b17);border-radius:10px;border:1px solid rgba(255,255,255,.07)}
-.item button{float:right;background:#3d443d;color:white;border:1px solid rgba(255,255,255,.1);padding:7px 10px;border-radius:7px}
-.common{color:#fff}.poor{color:#999}.uncommon{color:#35cc57}.rare{color:#4e8cff}.epic{color:#bd5cff}.legendary{color:#ff9b22}
+#hud{position:fixed;left:8px;top:calc(7px + env(safe-area-inset-top));width:238px;height:88px;background:linear-gradient(#171510ee,#050504e8);border:1px solid #836b35;border-radius:16px;box-shadow:0 5px 18px #0008;padding:8px 9px 8px 62px}
+#portrait{position:absolute;left:6px;top:7px;width:50px;height:50px;border-radius:50%;background:url(assets/portrait.png) center/cover;border:2px solid #c6a45b}
+#hud strong{font-size:15px}.bar{height:12px;background:#111;border-radius:5px;overflow:hidden;margin-top:5px;border:1px solid #4c3d23}.fill{height:100%}.hp{background:linear-gradient(#e03832,#9f1715)}.xp{background:linear-gradient(#b36fe0,#613294)}
+#stats{font-size:10px;margin-top:4px;color:#ddd}
+#level{position:absolute;left:19px;bottom:4px;width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:#15110b;border:2px solid #bd984b;font-weight:800}
+#quest{position:fixed;left:10px;top:calc(112px + env(safe-area-inset-top));background:#0c0d0bed;border:1px solid #6e623e;border-radius:10px;padding:10px 12px;width:220px;box-shadow:0 4px 14px #0007}
+#quest b{color:#ffd63d}#quest span{font-size:12px}
+#mini{position:fixed;right:8px;top:calc(8px + env(safe-area-inset-top));width:118px;height:118px;border-radius:50%;border:3px solid #9e7d3e;background:radial-gradient(circle,#3d5f2a,#172515);box-shadow:0 3px 15px #000a;overflow:hidden}
+#mini:after{content:"▲";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(25deg);color:#fff;text-shadow:0 1px 3px #000}
+#zone{position:fixed;right:18px;top:calc(132px + env(safe-area-inset-top));font-weight:800;color:#e8c66c;text-shadow:0 1px 2px #000}
+#joy{position:fixed;left:18px;bottom:calc(92px + env(safe-area-inset-bottom));width:132px;height:132px;border-radius:50%;background:radial-gradient(#35322bbc,#100f0dcc);border:2px solid #8d7850;box-shadow:inset 0 0 28px #000c,0 5px 20px #0008}
+#knob{position:absolute;left:39px;top:39px;width:52px;height:52px;border-radius:50%;background:radial-gradient(#4b4941,#191815);border:2px solid #8d8063}
+#abilities{position:fixed;right:18px;bottom:calc(98px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:13px}
+.ability{width:82px;height:82px;border-radius:50%;border:3px solid #8e7441;color:#fff;font-weight:800;font-size:10px;text-shadow:0 2px 3px #000;background-position:center;background-size:cover;box-shadow:0 5px 18px #0009}
+#whirl{background-image:linear-gradient(#0002,#0004),url(assets/whirlwind.png)}#charge{background-image:linear-gradient(#0001,#0004),url(assets/charge.png)}
+#combatlog{position:fixed;left:14px;right:108px;bottom:calc(86px + env(safe-area-inset-bottom));min-height:74px;max-height:96px;padding:8px 10px;background:#080909d9;border:1px solid #665b3c;border-radius:8px;font-size:11px;line-height:1.45;color:#e5e2d8}
+#nav{position:fixed;left:0;right:0;bottom:0;height:calc(76px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(3,1fr);background:linear-gradient(#16130f,#060505);border-top:1px solid #725b30}
+.navbtn{background:none;border:0;color:#ddd;font-size:11px;font-weight:700}.navbtn img{display:block;width:34px;height:34px;object-fit:cover;margin:0 auto 3px;border-radius:8px}
+#toast{position:fixed;left:50%;bottom:220px;transform:translateX(-50%);background:#000d;border:1px solid #7c6b43;padding:8px 12px;border-radius:8px;opacity:0;transition:.15s;z-index:5}
+#panel{display:none;position:fixed;inset:8% 5% 10%;z-index:20;background:linear-gradient(#15130f,#070707);border:1px solid #8b7140;border-radius:12px;padding:14px;overflow:auto}
+#close{float:right;width:34px;height:34px;border-radius:50%;border:1px solid #8b7140;background:#2a2117;color:#fff}.item{padding:10px;margin:8px 0;background:#1b1a17;border:1px solid #403721;border-radius:7px}.item button{float:right;background:#514326;color:white;border:1px solid #806b3e;border-radius:6px;padding:5px 9px}
+.common{color:#fff}.poor{color:#999}.uncommon{color:#4ed25c}.rare{color:#4d8fff}.epic{color:#ca63ff}
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
-
-<div id="hud">
-  <div id="portrait">⚔️</div>
-  <strong>Kael · Krieger · <span id="lvl">Lv. 1</span></strong>
-  <div class="bar"><div id="hpbar" class="fill hp"></div></div>
-  <div class="bar"><div id="xpbar" class="fill xp"></div></div>
-  <div id="stats" class="small"></div>
-</div>
-
-<div id="quest"><b>⚠ Wölfe im Wald</b><br><span id="qtxt">Schattenwölfe 0/5</span></div>
+<div id="hud"><div id="portrait"></div><strong>Arthas</strong><div class="bar"><div id="hp" class="fill hp"></div></div><div class="bar"><div id="xp" class="fill xp"></div></div><div id="stats"></div><div id="level">1</div></div>
+<div id="quest"><b>❕ Wölfe im Wald</b><br><span id="q">Tötet 5 Schattenwölfe (0/5)</span></div>
+<div id="mini"></div><div id="zone">Grünwald</div>
 <div id="toast"></div>
-
 <div id="joy"><div id="knob"></div></div>
-<div id="abilities">
-  <button id="whirl" class="ability">🌀<br>WIRBELWIND</button>
-  <button id="charge" class="ability">⚡<br>ANSTURM</button>
-</div>
-
+<div id="abilities"><button id="whirl" class="ability">WIRBELWIND</button><button id="charge" class="ability">ANSTURM</button></div>
+<div id="combatlog"></div>
 <div id="nav">
-  <button class="navbtn" data-panel="inventory"><span>🎒</span>Inventar</button>
-  <button class="navbtn" data-panel="character"><span>🛡️</span>Charakter</button>
-  <button class="navbtn" data-panel="quests"><span>📜</span>Quests</button>
+<button class="navbtn" data-p="inv"><img src="assets/inventory.png">Inventar</button>
+<button class="navbtn" data-p="char"><img src="assets/character.png">Charakter</button>
+<button class="navbtn" data-p="quest"><img src="assets/quests.png">Quests</button>
 </div>
-
-<div id="panel"><button id="close">×</button><div id="panelContent"></div></div>
-
+<div id="panel"><button id="close">×</button><div id="pc"></div></div>
 <script>
-const cvs=document.getElementById('game'),ctx=cvs.getContext('2d');
-const DPR=Math.min(devicePixelRatio||1,2);
-function resize(){cvs.width=innerWidth*DPR;cvs.height=innerHeight*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}
-addEventListener('resize',resize);resize();
-
-const saveKey="grunwald-pwa-save-v2";
-const D={x:0,y:80,hp:120,maxHp:120,level:1,xp:0,gold:0,kills:0,atk:18,armor:0,inv:[
- {id:crypto.randomUUID(),name:"Verwittertes Schwert",rarity:"common",atk:2,armor:0,equipped:true}
-]};
-let S;
-try{S={...D,...JSON.parse(localStorage.getItem(saveKey)||"{}")}}catch{S=structuredClone(D)}
-let joy={x:0,y:0},wolves=[],fx=[],drops=[],last=0,attackCD=0,whirlCD=0,chargeCD=0,time=0;
-const world={w:1100,h:1800};
-const decor=[];
-
-function rng(seed){let x=Math.sin(seed*999.91)*43758.5453;return x-Math.floor(x)}
-for(let i=0;i<95;i++){
- let x=rng(i*2.1)*980-490, y=rng(i*5.7+3)*1650-825;
- if(Math.abs(x)<95) continue;
- let type=i%7===0?"rock":i%5===0?"bush":"tree";
- decor.push({x,y,type,s:0.7+rng(i*9.3)*0.7});
-}
-for(let i=0;i<70;i++){
- let x=rng(i*4.4+99)*900-450,y=rng(i*7.1+17)*1600-800;
- if(Math.abs(x)<70) decor.push({x,y,type:"flower",s:.8+rng(i)*.5});
-}
-decor.push({x:0,y:-640,type:"gate",s:1});
-
-function save(){localStorage.setItem(saveKey,JSON.stringify(S))}
-function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
-function totalAtk(){return S.atk+S.inv.filter(i=>i.equipped).reduce((n,i)=>n+i.atk,0)}
-function totalArmor(){return S.armor+S.inv.filter(i=>i.equipped).reduce((n,i)=>n+i.armor,0)}
-function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,1500)}
-
-function spawnWolf(){
- let ang=Math.random()*Math.PI*2,d=330+Math.random()*380;
- wolves.push({x:Math.max(-460,Math.min(460,S.x+Math.cos(ang)*d)),y:Math.max(-790,Math.min(790,S.y+Math.sin(ang)*d)),
- hp:58,maxHp:58,cd:0,r:20,phase:Math.random()*6.2,flash:0});
-}
-for(let i=0;i<8;i++)spawnWolf();
-
-function reward(w){
- S.kills++;S.gold+=2+Math.floor(Math.random()*5);S.xp+=20;
- drops.push({x:w.x,y:w.y,t:7,kind:Math.random()<.25?"green":"gold"});
- if(S.xp>=100){S.xp-=100;S.level++;S.maxHp+=20;S.hp=S.maxHp;S.atk+=5;toast("Level "+S.level+" erreicht!")}
- if(S.kills===5){S.gold+=25;toast("Quest abgeschlossen! +25 Gold")}
- if(Math.random()<.5)dropLoot();
- save();
-}
-function dropLoot(){
- const roll=Math.random()*100;
- let rarity=roll<2?"epic":roll<8?"rare":roll<23?"uncommon":roll<42?"common":"poor";
- let names=["Wolfsklingen-Schwert","Waldhandschuhe","Eisenwams","Schattenwolf-Amulett","Runenring"];
- let item={id:crypto.randomUUID(),name:names[Math.floor(Math.random()*names.length)],rarity,
- atk:Math.floor(Math.random()*9)+(rarity==="rare"?4:rarity==="epic"?7:0),
- armor:Math.floor(Math.random()*6),equipped:false};
- S.inv.push(item);toast("Loot: "+item.name);save();
-}
-function damageWolf(w,dmg){
- w.hp-=dmg;w.flash=.12;
- fx.push({type:"damage",x:w.x,y:w.y,t:.5,text:String(dmg)});
- fx.push({type:"slash",x:w.x,y:w.y,t:.18,rot:Math.random()*1.2-.6});
- if(w.hp<=0){wolves=wolves.filter(x=>x!==w);reward(w);setTimeout(spawnWolf,900)}
-}
-function receiveDamage(n){
- n=Math.max(1,n-Math.floor(totalArmor()/2));S.hp-=n;fx.push({type:"hurt",x:S.x,y:S.y,t:.18});
- if(S.hp<=0){S.hp=S.maxHp;S.gold=Math.max(0,S.gold-5);S.x=0;S.y=80;toast("Besiegt. -5 Gold")}
- save();
-}
-function nearest(maxD){return wolves.map(w=>[w,dist(S,w)]).filter(x=>x[1]<=maxD).sort((a,b)=>a[1]-b[1])[0]?.[0]}
-
-function update(dt){
- time+=dt;
- const sp=150;
- S.x=Math.max(-470,Math.min(470,S.x+joy.x*sp*dt));
- S.y=Math.max(-810,Math.min(810,S.y+joy.y*sp*dt));
- attackCD-=dt;whirlCD=Math.max(0,whirlCD-dt);chargeCD=Math.max(0,chargeCD-dt);
-
- for(const w of wolves){
-   const dx=S.x-w.x,dy=S.y-w.y,d=Math.hypot(dx,dy);
-   if(d<280&&d>39){w.x+=dx/d*50*dt;w.y+=dy/d*50*dt}
-   w.cd-=dt;w.flash=Math.max(0,w.flash-dt);
-   if(d<41&&w.cd<=0){w.cd=1;receiveDamage(5+Math.floor(Math.random()*5))}
- }
- if(attackCD<=0){let w=nearest(66);if(w){attackCD=.68;damageWolf(w,totalAtk())}}
- for(const p of fx)p.t-=dt;fx=fx.filter(p=>p.t>0);
- for(const d of drops)d.t-=dt;drops=drops.filter(d=>d.t>0);
-}
-function drawTree(x,y,s){
- ctx.save();ctx.translate(x,y);ctx.scale(s,s);
- ctx.fillStyle="rgba(0,0,0,.22)";ctx.beginPath();ctx.ellipse(8,18,26,10,0,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#4b321f";ctx.fillRect(-5,5,10,24);
- const grad=ctx.createRadialGradient(-8,-18,5,0,-8,35);grad.addColorStop(0,"#315d2e");grad.addColorStop(1,"#123116");
- ctx.fillStyle=grad;
- [[-16,-8,18],[10,-12,19],[-3,-27,22],[2,2,20]].forEach(a=>{ctx.beginPath();ctx.arc(a[0],a[1],a[2],0,Math.PI*2);ctx.fill()});
- ctx.restore();
-}
-function drawRock(x,y,s){
- ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.fillStyle="rgba(0,0,0,.22)";ctx.beginPath();ctx.ellipse(5,11,21,8,0,0,Math.PI*2);ctx.fill();
- let g=ctx.createLinearGradient(-15,-15,18,18);g.addColorStop(0,"#7d8077");g.addColorStop(1,"#3f443f");
- ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(-17,8);ctx.lineTo(-10,-10);ctx.lineTo(6,-17);ctx.lineTo(19,-3);ctx.lineTo(14,13);ctx.lineTo(-5,16);ctx.closePath();ctx.fill();
- ctx.strokeStyle="rgba(255,255,255,.14)";ctx.stroke();ctx.restore();
-}
-function drawBush(x,y,s){
- ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.fillStyle="#1a481f";
- [[-12,0,14],[10,-3,15],[0,-12,16],[2,10,14]].forEach(a=>{ctx.beginPath();ctx.arc(a[0],a[1],a[2],0,Math.PI*2);ctx.fill()});
- ctx.fillStyle="#3f7c3f";for(let i=0;i<8;i++){let a=i*.8;ctx.beginPath();ctx.arc(Math.cos(a)*14,Math.sin(a)*10-3,3,0,Math.PI*2);ctx.fill()}ctx.restore();
-}
-function drawFlower(x,y,s){
- ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.fillStyle="#d8d2cc";
- for(let i=0;i<5;i++){let a=i*Math.PI*2/5;ctx.beginPath();ctx.arc(Math.cos(a)*4,Math.sin(a)*4,2.2,0,Math.PI*2);ctx.fill()}
- ctx.fillStyle="#f1c84c";ctx.beginPath();ctx.arc(0,0,2,0,Math.PI*2);ctx.fill();ctx.restore();
-}
-function drawGate(x,y,s){
- ctx.save();ctx.translate(x,y);ctx.scale(s,s);
- ctx.fillStyle="rgba(0,0,0,.3)";ctx.fillRect(-62,35,124,16);
- ctx.fillStyle="#4a2e1d";ctx.fillRect(-58,-18,16,68);ctx.fillRect(42,-18,16,68);
- ctx.fillStyle="#6a4325";ctx.fillRect(-72,-28,144,15);
- ctx.strokeStyle="#b07d3f";ctx.lineWidth=4;ctx.strokeRect(-72,-28,144,15);
- ctx.fillStyle="#202722";ctx.beginPath();ctx.arc(0,-14,16,Math.PI,0);ctx.fillRect(-16,-14,32,54);ctx.fill();
- ctx.restore();
-}
-function drawWolf(x,y,w){
- ctx.save();ctx.translate(x,y+Math.sin(time*7+w.phase)*1.5);
- ctx.fillStyle="rgba(0,0,0,.28)";ctx.beginPath();ctx.ellipse(0,16,25,8,0,0,Math.PI*2);ctx.fill();
- const g=ctx.createLinearGradient(-18,-18,18,22);g.addColorStop(0,w.flash>0?"#7a2727":"#36323a");g.addColorStop(1,"#17171a");
- ctx.fillStyle=g;
- ctx.beginPath();ctx.ellipse(0,2,22,14,-.12,0,Math.PI*2);ctx.fill();
- ctx.beginPath();ctx.ellipse(18,-5,13,10,.25,0,Math.PI*2);ctx.fill();
- ctx.beginPath();ctx.moveTo(12,-12);ctx.lineTo(15,-25);ctx.lineTo(21,-13);ctx.closePath();ctx.fill();
- ctx.beginPath();ctx.moveTo(21,-12);ctx.lineTo(27,-23);ctx.lineTo(29,-10);ctx.closePath();ctx.fill();
- ctx.strokeStyle="#17171a";ctx.lineWidth=5;
- [[-10,10,-14,24],[2,11,0,25],[11,9,15,23],[-16,4,-28,0]].forEach(l=>{ctx.beginPath();ctx.moveTo(l[0],l[1]);ctx.lineTo(l[2],l[3]);ctx.stroke()});
- ctx.strokeStyle="#27252a";ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(-19,0);ctx.quadraticCurveTo(-31,-9,-37,-2);ctx.stroke();
- ctx.fillStyle="#ff4949";ctx.beginPath();ctx.arc(22,-7,1.8,0,Math.PI*2);ctx.fill();
- ctx.restore();
-}
-function drawPlayer(x,y){
- ctx.save();ctx.translate(x,y);
- ctx.fillStyle="rgba(0,0,0,.3)";ctx.beginPath();ctx.ellipse(0,19,23,8,0,0,Math.PI*2);ctx.fill();
- ctx.strokeStyle="rgba(48,255,77,.6)";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,15,25,10,0,0,Math.PI*2);ctx.stroke();
- // cape
- ctx.fillStyle="#193b63";ctx.beginPath();ctx.moveTo(-11,-1);ctx.lineTo(-17,26);ctx.lineTo(6,21);ctx.lineTo(10,0);ctx.closePath();ctx.fill();
- ctx.strokeStyle="#c59b42";ctx.lineWidth=1.5;ctx.stroke();
- // legs
- ctx.strokeStyle="#242b31";ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(-6,12);ctx.lineTo(-8,27);ctx.moveTo(6,12);ctx.lineTo(9,27);ctx.stroke();
- // torso armor
- let g=ctx.createLinearGradient(-13,-18,13,17);g.addColorStop(0,"#586577");g.addColorStop(.5,"#283442");g.addColorStop(1,"#121820");
- ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(-13,-14,26,30,7);ctx.fill();ctx.strokeStyle="#c8a55a";ctx.lineWidth=2;ctx.stroke();
- // shoulders
- ctx.fillStyle="#657386";ctx.beginPath();ctx.arc(-15,-8,8,0,Math.PI*2);ctx.arc(15,-8,8,0,Math.PI*2);ctx.fill();
- // head
- ctx.fillStyle="#d2a47c";ctx.beginPath();ctx.arc(0,-24,8,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#3a2b23";ctx.beginPath();ctx.arc(0,-26,8,Math.PI,Math.PI*2);ctx.fill();
- // sword
- ctx.save();ctx.rotate(-.65);ctx.fillStyle="#e8edf0";ctx.fillRect(13,-4,5,35);ctx.fillStyle="#caa351";ctx.fillRect(9,24,13,4);ctx.fillStyle="#5b3822";ctx.fillRect(14,28,3,11);ctx.restore();
- ctx.restore();
-}
-function draw(){
- const W=innerWidth,H=innerHeight,cx=W/2,cy=H/2,camX=S.x,camY=S.y;
- // forest floor gradient + dappled light
- let bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#29452a");bg.addColorStop(.55,"#345d32");bg.addColorStop(1,"#243f24");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
- for(let i=0;i<38;i++){let x=(rng(i*3.2+time*.01)*W),y=(rng(i*5.1+1)*H),r=18+rng(i)*45;ctx.fillStyle="rgba(255,245,180,.025)";ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
- // winding path
- ctx.strokeStyle="#6b5732";ctx.lineWidth=110;ctx.lineCap="round";
- ctx.beginPath();ctx.moveTo(cx+(0-camX),-100-camY*.02);ctx.bezierCurveTo(cx+40-camX*.1,H*.28,cx-45-camX*.08,H*.68,cx+(0-camX),H+100);ctx.stroke();
- ctx.strokeStyle="rgba(178,148,85,.2)";ctx.lineWidth=4;ctx.stroke();
-
- const drawables=[];
- for(const d of decor){let sx=cx+(d.x-camX),sy=cy+(d.y-camY);if(sx>-100&&sx<W+100&&sy>-100&&sy<H+120)drawables.push({y:sy,obj:d,sx,sy})}
- for(const w of wolves){let sx=cx+(w.x-camX),sy=cy+(w.y-camY);if(sx>-80&&sx<W+80&&sy>-80&&sy<H+80)drawables.push({y:sy,obj:w,sx,sy,wolf:true})}
- drawables.push({y:cy,obj:{player:true},sx:cx,sy:cy});
- drawables.sort((a,b)=>a.y-b.y);
- for(const d of drawables){
-   if(d.obj.player){drawPlayer(d.sx,d.sy);continue}
-   if(d.wolf){drawWolf(d.sx,d.sy,d.obj);continue}
-   switch(d.obj.type){
-     case "tree":drawTree(d.sx,d.sy,d.obj.s);break;
-     case "rock":drawRock(d.sx,d.sy,d.obj.s);break;
-     case "bush":drawBush(d.sx,d.sy,d.obj.s);break;
-     case "flower":drawFlower(d.sx,d.sy,d.obj.s);break;
-     case "gate":drawGate(d.sx,d.sy,d.obj.s);break;
-   }
- }
- // enemy health/name
- for(const w of wolves){
-   let sx=cx+(w.x-camX),sy=cy+(w.y-camY);
-   if(sx<-70||sx>W+70||sy<-70||sy>H+70)continue;
-   ctx.fillStyle="rgba(0,0,0,.72)";ctx.fillRect(sx-26,sy-37,52,6);ctx.fillStyle="#b93434";ctx.fillRect(sx-26,sy-37,52*(w.hp/w.maxHp),6);
-   ctx.fillStyle="#f2f2f2";ctx.font="10px -apple-system";ctx.textAlign="center";ctx.fillText("Schattenwolf",sx,sy-43);
- }
- // loot drops
- for(const d of drops){
-   let sx=cx+(d.x-camX),sy=cy+(d.y-camY);
-   const pulse=1+Math.sin(time*6)*.08;
-   ctx.save();ctx.translate(sx,sy);ctx.scale(pulse,pulse);
-   ctx.fillStyle=d.kind==="green"?"rgba(62,220,92,.18)":"rgba(244,195,63,.16)";
-   ctx.beginPath();ctx.arc(0,0,20,0,Math.PI*2);ctx.fill();
-   ctx.fillStyle=d.kind==="green"?"#51dc6d":"#f4c33f";
-   ctx.font="20px -apple-system";ctx.fillText(d.kind==="green"?"◆":"●",0,6);ctx.restore();
- }
- // combat fx
- for(const p of fx){
-   let sx=cx+(p.x-camX),sy=cy+(p.y-camY);
-   if(p.type==="damage"){
-     ctx.globalAlpha=Math.max(0,p.t/.5);ctx.fillStyle="#ffd95c";ctx.font="bold 22px -apple-system";ctx.textAlign="center";ctx.fillText(p.text,sx,sy-25-(.5-p.t)*35);ctx.globalAlpha=1;
-   }else if(p.type==="slash"){
-     ctx.save();ctx.translate(sx,sy);ctx.rotate(p.rot);ctx.globalAlpha=p.t/.18;ctx.strokeStyle="#fff3b0";ctx.lineWidth=7;ctx.beginPath();ctx.arc(0,0,28,-1.1,.7);ctx.stroke();ctx.restore();ctx.globalAlpha=1;
-   }else if(p.type==="hurt"){
-     ctx.fillStyle=`rgba(255,40,40,${p.t*.18})`;ctx.fillRect(0,0,W,H);
-   }else if(p.type==="ring"){
-     ctx.globalAlpha=p.t/.4;ctx.strokeStyle="#ff9f2e";ctx.lineWidth=7;ctx.beginPath();ctx.arc(sx,sy,88*(1-p.t/.4)+25,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
-   }
- }
- document.getElementById('hpbar').style.width=(S.hp/S.maxHp*100)+"%";
- document.getElementById('xpbar').style.width=(S.xp/100*100)+"%";
- document.getElementById('lvl').textContent="Lv. "+S.level;
- document.getElementById('stats').textContent=`${Math.ceil(S.hp)}/${S.maxHp} HP · ${S.gold} Gold · Angriff ${totalAtk()}`;
- document.getElementById('qtxt').textContent=S.kills>=5?"Abgeschlossen ✓":`Schattenwölfe ${Math.min(S.kills,5)}/5`;
- document.getElementById('whirl').innerHTML=whirlCD>0?`🌀<br>${whirlCD.toFixed(1)} s`:"🌀<br>WIRBELWIND";
- document.getElementById('charge').innerHTML=chargeCD>0?`⚡<br>${chargeCD.toFixed(1)} s`:"⚡<br>ANSTURM";
-}
+const cvs=document.getElementById('game'),ctx=cvs.getContext('2d'),DPR=Math.min(devicePixelRatio||1,2);
+function resize(){cvs.width=innerWidth*DPR;cvs.height=innerHeight*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)} addEventListener('resize',resize);resize();
+const I={hero:new Image(),wolf:new Image(),grass:new Image(),path:new Image()};I.hero.src='assets/hero.png';I.wolf.src='assets/wolf.png';I.grass.src='assets/grass.jpg';I.path.src='assets/path.jpg';
+const key='grunwald-v03';const base={x:0,y:0,hp:512,maxHp:512,xp:45,level:3,gold:0,kills:0,atk:58,inv:[{id:crypto.randomUUID(),name:'Stahlklinge',rarity:'common',atk:7,armor:0,equipped:true}]};let S;
+try{S={...base,...JSON.parse(localStorage.getItem(key)||'{}')}}catch{S=structuredClone(base)}
+let joy={x:0,y:0},wolves=[],fx=[],last=0,atkcd=0,wcd=0,ccd=0,logs=['Ihr habt Grünwald betreten.'];
+function save(){localStorage.setItem(key,JSON.stringify(S))}
+function d(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}function atk(){return S.atk+S.inv.filter(i=>i.equipped).reduce((n,i)=>n+i.atk,0)}
+function msg(t,c=''){logs.unshift((c?`<span style="color:${c}">`:'')+t+(c?'</span>':''));logs=logs.slice(0,4);document.getElementById('combatlog').innerHTML=logs.join('<br>')}
+function toast(t){let e=document.getElementById('toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,1300)}
+function spawn(){let a=Math.random()*6.28,r=280+Math.random()*350;wolves.push({x:S.x+Math.cos(a)*r,y:S.y+Math.sin(a)*r,hp:180,maxHp:180,cd:0,flip:Math.random()<.5})} for(let i=0;i<6;i++)spawn();
+function hit(w,n){w.hp-=n;fx.push({x:w.x,y:w.y,t:.5,n});if(w.hp<=0){wolves=wolves.filter(v=>v!==w);S.kills++;S.gold+=12;S.xp+=18;msg('Ihr habt 18 Erfahrung erhalten.','#4fb5ff');msg('Ihr habt 12 Gold erhalten.','#ffd44d');if(Math.random()<.55){let item={id:crypto.randomUUID(),name:'Wolfszahn-Schwert',rarity:Math.random()<.2?'rare':'uncommon',atk:5+Math.floor(Math.random()*12),armor:0,equipped:false};S.inv.push(item);msg(`Ihr habt [${item.name}] erhalten!`,item.rarity==='rare'?'#438aff':'#41d35a')}if(S.kills===5)toast('Quest abgeschlossen!');save();setTimeout(spawn,900)}}
+function update(dt){S.x+=joy.x*165*dt;S.y+=joy.y*165*dt;atkcd-=dt;wcd=Math.max(0,wcd-dt);ccd=Math.max(0,ccd-dt);for(const w of wolves){let dx=S.x-w.x,dy=S.y-w.y,dd=Math.hypot(dx,dy);w.flip=dx<0;if(dd<260&&dd>58){w.x+=dx/dd*48*dt;w.y+=dy/dd*48*dt}w.cd-=dt;if(dd<65&&w.cd<=0){w.cd=1.1;S.hp=Math.max(1,S.hp-8)}}if(atkcd<=0){let w=wolves.map(x=>[x,d(S,x)]).filter(x=>x[1]<80).sort((a,b)=>a[1]-b[1])[0]?.[0];if(w){atkcd=.7;hit(w,86)}}for(const f of fx)f.t-=dt;fx=fx.filter(f=>f.t>0)}
+function draw(){let W=innerWidth,H=innerHeight,cx=W/2,cy=H/2;let gp=ctx.createPattern(I.grass,'repeat');if(gp){ctx.fillStyle=gp;ctx.fillRect(0,0,W,H)}else{ctx.fillStyle='#263d1c';ctx.fillRect(0,0,W,H)}let pp=ctx.createPattern(I.path,'repeat-y');if(pp){ctx.save();ctx.translate(cx-72-(S.x%80)*.05,-(S.y%512));ctx.fillStyle=pp;ctx.fillRect(0,-512,144,H+1024);ctx.restore()}ctx.fillStyle='rgba(0,0,0,.12)';for(let i=0;i<28;i++){let x=(i*151-S.x*.25)%W,y=(i*277-S.y*.25)%H;ctx.beginPath();ctx.arc(x<0?x+W:x,y<0?y+H:y,15+(i%4)*6,0,6.28);ctx.fill()}
+for(const w of wolves){let x=cx+w.x-S.x,y=cy+w.y-S.y;if(x<-90||x>W+90||y<-80||y>H+100)continue;ctx.save();ctx.translate(x,y);if(w.flip)ctx.scale(-1,1);ctx.shadowColor='#000';ctx.shadowBlur=12;ctx.shadowOffsetY=8;ctx.drawImage(I.wolf,-62,-42,124,86);ctx.restore();ctx.fillStyle='#111d';ctx.fillRect(x-42,y-55,84,9);ctx.fillStyle='#b6201d';ctx.fillRect(x-42,y-55,84*(w.hp/w.maxHp),9);ctx.fillStyle='#fff';ctx.font='12px -apple-system';ctx.textAlign='center';ctx.fillText('Schattenwolf',x,y-62)}
+ctx.save();ctx.shadowColor='#000';ctx.shadowBlur=15;ctx.shadowOffsetY=10;ctx.drawImage(I.hero,cx-66,cy-86,132,165);ctx.restore();ctx.strokeStyle='#32d441aa';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(cx,cy+55,44,15,0,0,6.28);ctx.stroke();
+for(const f of fx){let x=cx+f.x-S.x,y=cy+f.y-S.y;ctx.globalAlpha=f.t/.5;ctx.fillStyle='#ffcf45';ctx.font='bold 27px -apple-system';ctx.fillText(f.n,x,y-50-(.5-f.t)*35);ctx.globalAlpha=1;ctx.strokeStyle='#ff6a1a';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x-25,y+5);ctx.lineTo(x+28,y-20);ctx.stroke()}
+document.getElementById('hp').style.width=(S.hp/S.maxHp*100)+'%';document.getElementById('xp').style.width=(S.xp/900*100)+'%';document.getElementById('stats').textContent=`${S.hp} / ${S.maxHp}   ·   ${S.gold} Gold`;document.getElementById('level').textContent=S.level;document.getElementById('q').textContent=S.kills>=5?'Quest abgeschlossen ✓':`Tötet 5 Schattenwölfe (${Math.min(S.kills,5)}/5)`;document.getElementById('whirl').textContent=wcd>0?wcd.toFixed(1)+' s':'WIRBELWIND';document.getElementById('charge').textContent=ccd>0?ccd.toFixed(1)+' s':'ANSTURM'}
 function loop(t){let dt=Math.min(.05,(t-last)/1000||.016);last=t;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
-
-document.getElementById('whirl').onclick=()=>{
- if(whirlCD>0)return;whirlCD=5;let hits=0;fx.push({type:"ring",x:S.x,y:S.y,t:.4});
- for(const w of [...wolves])if(dist(S,w)<90){damageWolf(w,totalAtk()+10);hits++}
- toast(hits?`Wirbelwind trifft ${hits} Gegner`:"Kein Gegner in Reichweite");
-};
-document.getElementById('charge').onclick=()=>{
- if(chargeCD>0)return;let w=nearest(250);if(!w){toast("Kein Ziel in Reichweite");return}
- chargeCD=6;let dx=w.x-S.x,dy=w.y-S.y,d=Math.max(1,Math.hypot(dx,dy));S.x=w.x-dx/d*34;S.y=w.y-dy/d*34;damageWolf(w,totalAtk()+15);
-};
-
-const joyEl=document.getElementById('joy'),knob=document.getElementById('knob');
-function setJoy(x,y){
- let r=joyEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=x-cx,dy=y-cy,m=39,d=Math.hypot(dx,dy);
- if(d>m){dx=dx/d*m;dy=dy/d*m}
- joy.x=dx/m;joy.y=dy/m;knob.style.transform=`translate(${dx}px,${dy}px)`;
-}
-joyEl.addEventListener('pointerdown',e=>{joyEl.setPointerCapture(e.pointerId);setJoy(e.clientX,e.clientY)});
-joyEl.addEventListener('pointermove',e=>{if(e.buttons)setJoy(e.clientX,e.clientY)});
-joyEl.addEventListener('pointerup',()=>{joy={x:0,y:0};knob.style.transform="translate(0,0)"});
-
-const panel=document.getElementById('panel'),pc=document.getElementById('panelContent');
-document.getElementById('close').onclick=()=>panel.style.display="none";
-document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>{
- const type=b.dataset.panel;
- if(type==="inventory"){
-   pc.innerHTML="<h2>Inventar</h2>"+S.inv.map(i=>`<div class="item ${i.rarity}"><button onclick="toggleEquip('${i.id}')">${i.equipped?"Ablegen":"Anlegen"}</button><b>${i.name}</b><br><small>Angriff +${i.atk} · Rüstung +${i.armor}</small></div>`).join("");
- }else if(type==="character"){
-   pc.innerHTML=`<h2>Kael · Krieger</h2><div class="item">Level: ${S.level}<br>HP: ${S.hp}/${S.maxHp}<br>Angriff: ${totalAtk()}<br>Rüstung: ${totalArmor()}<br>Gold: ${S.gold}<br>Besiegte Wölfe: ${S.kills}</div>`;
- }else{
-   pc.innerHTML=`<h2>Wölfe im Wald</h2><div class="item">Die Schattenwölfe rücken immer näher an Grünwald heran.<br><br>Fortschritt: ${Math.min(S.kills,5)}/5<br>${S.kills>=5?"<b style='color:#35cc57'>Abgeschlossen ✓</b>":"Belohnung: 25 Gold + Erfahrung"}</div>`;
- }
- panel.style.display="block";
-});
-window.toggleEquip=id=>{let i=S.inv.find(x=>x.id===id);if(i){i.equipped=!i.equipped;save();document.querySelector('[data-panel="inventory"]').click()}};
-
-if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+document.getElementById('whirl').onclick=()=>{if(wcd)return;wcd=5;let n=0;for(const w of [...wolves])if(d(S,w)<115){hit(w,105);n++}toast(n?`Wirbelwind: ${n} Treffer`:'Kein Gegner in Reichweite')};
+document.getElementById('charge').onclick=()=>{if(ccd)return;let w=wolves.map(x=>[x,d(S,x)]).filter(x=>x[1]<270).sort((a,b)=>a[1]-b[1])[0]?.[0];if(!w)return toast('Kein Ziel');ccd=6;let dx=w.x-S.x,dy=w.y-S.y,l=Math.hypot(dx,dy);S.x=w.x-dx/l*55;S.y=w.y-dy/l*55;hit(w,120)};
+const je=document.getElementById('joy'),kn=document.getElementById('knob');function sj(x,y){let r=je.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2),m=39,l=Math.hypot(dx,dy);if(l>m){dx=dx/l*m;dy=dy/l*m}joy={x:dx/m,y:dy/m};kn.style.transform=`translate(${dx}px,${dy}px)`}je.addEventListener('pointerdown',e=>{je.setPointerCapture(e.pointerId);sj(e.clientX,e.clientY)});je.addEventListener('pointermove',e=>{if(e.buttons)sj(e.clientX,e.clientY)});je.addEventListener('pointerup',()=>{joy={x:0,y:0};kn.style.transform='translate(0,0)'});
+const panel=document.getElementById('panel'),pc=document.getElementById('pc');document.getElementById('close').onclick=()=>panel.style.display='none';document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>{if(b.dataset.p==='inv'){pc.innerHTML='<h2>Inventar</h2>'+S.inv.map(i=>`<div class="item ${i.rarity}"><button onclick="eq('${i.id}')">${i.equipped?'Ablegen':'Anlegen'}</button><b>${i.name}</b><br><small>Angriff +${i.atk}</small></div>`).join('')}else if(b.dataset.p==='char'){pc.innerHTML=`<h2>Arthas · Krieger</h2><div class="item">Level ${S.level}<br>Leben ${S.hp}/${S.maxHp}<br>Angriff ${atk()}<br>Gold ${S.gold}</div>`}else{pc.innerHTML=`<h2>Wölfe im Wald</h2><div class="item">Tötet 5 Schattenwölfe.<br>Fortschritt ${Math.min(S.kills,5)}/5</div>`}panel.style.display='block'});window.eq=id=>{let i=S.inv.find(x=>x.id===id);if(i){i.equipped=!i.equipped;save();document.querySelector('[data-p="inv"]').click()}};
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
 </script>
-</body>
-</html>
+</body></html>
