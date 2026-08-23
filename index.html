@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#11150f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Grünwald RPG">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Grünwald RPG</title>
+<style>
+:root{--panel:rgba(15,17,15,.78);--gold:#e5bd54}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}
+body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;background:#365d2f}
+#hud{position:fixed;left:10px;top:calc(8px + env(safe-area-inset-top));width:220px;background:var(--panel);padding:9px;border-radius:14px;border:1px solid rgba(255,255,255,.15)}
+#hud strong{font-size:15px}
+.bar{height:12px;background:#1d1d1d;border-radius:999px;overflow:hidden;margin-top:5px}
+.fill{height:100%;width:100%}.hp{background:#b93232}.xp{background:#7c48c6}
+.small{font-size:11px;opacity:.9;margin-top:5px}
+#quest{position:fixed;right:10px;top:calc(8px + env(safe-area-inset-top));width:165px;background:var(--panel);padding:9px;border-radius:14px;font-size:12px;border:1px solid rgba(255,255,255,.15)}
+#quest b{color:#f0ce63}
+#toast{position:fixed;left:50%;bottom:190px;transform:translateX(-50%);background:rgba(0,0,0,.78);padding:9px 12px;border-radius:10px;font-size:13px;opacity:0;transition:.18s;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis}
+#joy{position:fixed;left:18px;bottom:calc(92px + env(safe-area-inset-bottom));width:122px;height:122px;border-radius:50%;background:rgba(0,0,0,.34);border:2px solid rgba(255,255,255,.18)}
+#knob{position:absolute;width:48px;height:48px;border-radius:50%;left:37px;top:37px;background:rgba(255,255,255,.32);border:1px solid rgba(255,255,255,.24)}
+#abilities{position:fixed;right:18px;bottom:calc(94px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px}
+.ability{width:72px;height:72px;border-radius:50%;border:2px solid rgba(255,255,255,.18);background:radial-gradient(circle at 30% 30%,#ec8b22,#6c1f10 72%);color:#fff;font-weight:800;font-size:11px}
+.ability.blue{background:radial-gradient(circle at 30% 30%,#5db0ff,#183b86 72%)}
+#nav{position:fixed;left:0;right:0;bottom:0;height:calc(78px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);display:grid;grid-template-columns:1fr 1fr 1fr;background:rgba(8,9,8,.94);border-top:1px solid rgba(255,255,255,.15)}
+.navbtn{background:none;border:0;color:#fff;font-size:12px;font-weight:700}
+.navbtn span{display:block;font-size:24px;margin-bottom:3px}
+#panel{position:fixed;inset:8% 5% 10%;background:rgba(13,15,14,.98);border:1px solid #666;border-radius:18px;padding:16px;display:none;overflow:auto;z-index:10}
+#close{position:sticky;float:right;top:0;width:34px;height:34px;border:0;border-radius:50%;background:#444;color:#fff;font-size:20px}
+.item{padding:10px;margin:8px 0;background:#232923;border-radius:10px;border:1px solid rgba(255,255,255,.07)}
+.item button{float:right;background:#444;color:white;border:0;padding:6px 9px;border-radius:7px}
+.common{color:#fff}.poor{color:#999}.uncommon{color:#35cc57}.rare{color:#4e8cff}.epic{color:#bd5cff}.legendary{color:#ff9b22}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud">
+  <strong>Kael · Krieger · <span id="lvl">Lv. 1</span></strong>
+  <div class="bar"><div id="hpbar" class="fill hp"></div></div>
+  <div class="bar"><div id="xpbar" class="fill xp"></div></div>
+  <div id="stats" class="small"></div>
+</div>
+
+<div id="quest"><b>Wölfe im Wald</b><br><span id="qtxt">Schattenwölfe 0/5</span></div>
+<div id="toast"></div>
+
+<div id="joy"><div id="knob"></div></div>
+<div id="abilities">
+  <button id="whirl" class="ability">WIRBELWIND</button>
+  <button id="charge" class="ability blue">ANSTURM</button>
+</div>
+
+<div id="nav">
+  <button class="navbtn" data-panel="inventory"><span>🎒</span>Inventar</button>
+  <button class="navbtn" data-panel="character"><span>🛡️</span>Charakter</button>
+  <button class="navbtn" data-panel="quests"><span>📖</span>Quests</button>
+</div>
+
+<div id="panel"><button id="close">×</button><div id="panelContent"></div></div>
+
+<script>
+const cvs=document.getElementById('game'),ctx=cvs.getContext('2d');
+let DPR=Math.min(devicePixelRatio||1,2);
+function resize(){cvs.width=innerWidth*DPR;cvs.height=innerHeight*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}
+addEventListener('resize',resize);resize();
+
+const saveKey="grunwald-pwa-save-v1";
+const defaultState={x:0,y:40,hp:120,maxHp:120,level:1,xp:0,gold:0,kills:0,atk:18,armor:0,inv:[
+ {id:crypto.randomUUID(),name:"Verwittertes Schwert",rarity:"common",atk:2,armor:0,equipped:true}
+]};
+let S;
+try{S={...defaultState,...JSON.parse(localStorage.getItem(saveKey)||"{}")}}catch{S=structuredClone(defaultState)}
+let joy={x:0,y:0},wolves=[],particles=[],last=0,attackCD=0,whirlCD=0,chargeCD=0;
+const world={w:1000,h:1700};
+
+function save(){localStorage.setItem(saveKey,JSON.stringify(S))}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function totalAtk(){return S.atk+S.inv.filter(i=>i.equipped).reduce((n,i)=>n+i.atk,0)}
+function totalArmor(){return S.armor+S.inv.filter(i=>i.equipped).reduce((n,i)=>n+i.armor,0)}
+function toast(t){let e=document.getElementById('toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,1500)}
+
+function spawnWolf(){
+ const side=Math.random()<.5;
+ wolves.push({x:side?(Math.random()<.5?-430:430):(Math.random()*700-350),
+ y:side?(Math.random()*1200-600):(Math.random()<.5?-720:720),hp:55,maxHp:55,cd:0,r:18});
+}
+for(let i=0;i<7;i++)spawnWolf();
+
+function reward(){
+ S.kills++;S.gold+=2+Math.floor(Math.random()*5);S.xp+=20;
+ if(S.xp>=100){S.xp-=100;S.level++;S.maxHp+=20;S.hp=S.maxHp;S.atk+=5;toast("Level "+S.level+" erreicht!")}
+ if(S.kills===5){S.gold+=25;toast("Quest abgeschlossen! +25 Gold")}
+ if(Math.random()<.46)dropLoot();
+ save();
+}
+function dropLoot(){
+ const roll=Math.random()*100;
+ let rarity=roll<2?"epic":roll<8?"rare":roll<22?"uncommon":roll<40?"common":"poor";
+ let names=["Wolfsklingen-Schwert","Waldhandschuhe","Eisenwams","Schattenwolf-Amulett"];
+ let item={id:crypto.randomUUID(),name:names[Math.floor(Math.random()*names.length)],rarity,
+ atk:Math.floor(Math.random()*9)+(rarity==="rare"?4:rarity==="epic"?7:0),
+ armor:Math.floor(Math.random()*6),equipped:false};
+ S.inv.push(item);toast("Loot: "+item.name);save();
+}
+function damageWolf(w,dmg){
+ w.hp-=dmg;particles.push({x:w.x,y:w.y,t:0.45,text:String(dmg)});
+ if(w.hp<=0){wolves=wolves.filter(x=>x!==w);reward();setTimeout(spawnWolf,700)}
+}
+function receiveDamage(n){
+ n=Math.max(1,n-Math.floor(totalArmor()/2));S.hp-=n;
+ if(S.hp<=0){S.hp=S.maxHp;S.gold=Math.max(0,S.gold-5);S.x=0;S.y=40;toast("Besiegt. -5 Gold")}
+ save();
+}
+function nearest(maxD){return wolves.map(w=>[w,dist(S,w)]).filter(x=>x[1]<=maxD).sort((a,b)=>a[1]-b[1])[0]?.[0]}
+
+function update(dt){
+ const sp=145;S.x=Math.max(-450,Math.min(450,S.x+joy.x*sp*dt));S.y=Math.max(-760,Math.min(760,S.y+joy.y*sp*dt));
+ attackCD-=dt;whirlCD=Math.max(0,whirlCD-dt);chargeCD=Math.max(0,chargeCD-dt);
+
+ for(const w of wolves){
+   let dx=S.x-w.x,dy=S.y-w.y,d=Math.hypot(dx,dy);
+   if(d<260&&d>35){w.x+=dx/d*46*dt;w.y+=dy/d*46*dt}
+   w.cd-=dt;if(d<38&&w.cd<=0){w.cd=1;receiveDamage(5+Math.floor(Math.random()*5))}
+ }
+ if(attackCD<=0){let w=nearest(62);if(w){attackCD=.7;damageWolf(w,totalAtk())}}
+ for(const p of particles)p.t-=dt;particles=particles.filter(p=>p.t>0);
+}
+
+function draw(){
+ const W=innerWidth,H=innerHeight,cx=W/2,cy=H/2,camX=S.x,camY=S.y;
+ ctx.fillStyle="#34582e";ctx.fillRect(0,0,W,H);
+ ctx.fillStyle="rgba(120,88,45,.7)";ctx.fillRect(cx-48,0,96,H);
+
+ for(let i=0;i<45;i++){
+   let tx=((i*173)%900)-450,ty=((i*307)%1500)-750;
+   if(Math.abs(tx)<85)continue;
+   let sx=cx+(tx-camX),sy=cy+(ty-camY);
+   ctx.fillStyle="#17351b";ctx.beginPath();ctx.arc(sx,sy,16,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle="#5a5c57";ctx.beginPath();ctx.arc(sx+16,sy+12,5,0,Math.PI*2);ctx.fill();
+ }
+ for(const w of wolves){
+   let sx=cx+(w.x-camX),sy=cy+(w.y-camY);
+   if(sx<-40||sx>W+40||sy<-40||sy>H+40)continue;
+   ctx.fillStyle="#241d27";ctx.beginPath();ctx.arc(sx,sy,18,0,Math.PI*2);ctx.fill();
+   ctx.strokeStyle="#b13c3c";ctx.lineWidth=2;ctx.stroke();
+   ctx.fillStyle="#000";ctx.fillRect(sx-24,sy-32,48,5);ctx.fillStyle="#b43131";ctx.fillRect(sx-24,sy-32,48*(w.hp/w.maxHp),5);
+   ctx.fillStyle="#fff";ctx.font="10px -apple-system";ctx.textAlign="center";ctx.fillText("Schattenwolf",sx,sy-39);
+ }
+ ctx.fillStyle="#244f9c";ctx.beginPath();ctx.arc(cx,cy,19,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.stroke();
+ ctx.strokeStyle="#d7d7d7";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(cx-10,cy+10);ctx.lineTo(cx+18,cy-18);ctx.stroke();
+
+ for(const p of particles){
+   let sx=cx+(p.x-camX),sy=cy+(p.y-camY)-((.45-p.t)*35);
+   ctx.globalAlpha=Math.max(0,p.t/.45);ctx.fillStyle="#ffd35c";ctx.font="bold 20px -apple-system";ctx.fillText(p.text,sx,sy);ctx.globalAlpha=1;
+ }
+ document.getElementById('hpbar').style.width=(S.hp/S.maxHp*100)+"%";
+ document.getElementById('xpbar').style.width=(S.xp/100*100)+"%";
+ document.getElementById('lvl').textContent="Lv. "+S.level;
+ document.getElementById('stats').textContent=`${Math.ceil(S.hp)}/${S.maxHp} HP · ${S.gold} Gold · Angriff ${totalAtk()}`;
+ document.getElementById('qtxt').textContent=S.kills>=5?"Abgeschlossen ✓":`Schattenwölfe ${Math.min(S.kills,5)}/5`;
+ document.getElementById('whirl').textContent=whirlCD>0?`WIRBEL ${whirlCD.toFixed(1)}`:"WIRBELWIND";
+ document.getElementById('charge').textContent=chargeCD>0?`ANSTURM ${chargeCD.toFixed(1)}`:"ANSTURM";
+}
+
+function loop(t){let dt=Math.min(.05,(t-last)/1000||.016);last=t;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+
+document.getElementById('whirl').onclick=()=>{
+ if(whirlCD>0)return;whirlCD=5;let hits=0;
+ for(const w of [...wolves])if(dist(S,w)<85){damageWolf(w,totalAtk()+10);hits++}
+ toast(hits?`Wirbelwind trifft ${hits}`:"Kein Gegner in Reichweite");
+};
+document.getElementById('charge').onclick=()=>{
+ if(chargeCD>0)return;let w=nearest(230);if(!w){toast("Kein Ziel in Reichweite");return}
+ chargeCD=6;let dx=w.x-S.x,dy=w.y-S.y,d=Math.max(1,Math.hypot(dx,dy));S.x=w.x-dx/d*34;S.y=w.y-dy/d*34;damageWolf(w,totalAtk()+15);
+};
+
+const joyEl=document.getElementById('joy'),knob=document.getElementById('knob');
+function setJoy(x,y){
+ let r=joyEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=x-cx,dy=y-cy,m=38,d=Math.hypot(dx,dy);
+ if(d>m){dx=dx/d*m;dy=dy/d*m}
+ joy.x=dx/m;joy.y=dy/m;knob.style.transform=`translate(${dx}px,${dy}px)`;
+}
+joyEl.addEventListener('pointerdown',e=>{joyEl.setPointerCapture(e.pointerId);setJoy(e.clientX,e.clientY)});
+joyEl.addEventListener('pointermove',e=>{if(e.buttons)setJoy(e.clientX,e.clientY)});
+joyEl.addEventListener('pointerup',()=>{joy={x:0,y:0};knob.style.transform="translate(0,0)"});
+
+const panel=document.getElementById('panel'),pc=document.getElementById('panelContent');
+document.getElementById('close').onclick=()=>panel.style.display="none";
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>{
+ const type=b.dataset.panel;
+ if(type==="inventory"){
+   pc.innerHTML="<h2>Inventar</h2>"+S.inv.map(i=>`<div class="item ${i.rarity}"><button onclick="toggleEquip('${i.id}')">${i.equipped?"Ablegen":"Anlegen"}</button><b>${i.name}</b><br><small>Angriff +${i.atk} · Rüstung +${i.armor}</small></div>`).join("");
+ }else if(type==="character"){
+   pc.innerHTML=`<h2>Kael · Krieger</h2><div class="item">Level: ${S.level}<br>HP: ${S.hp}/${S.maxHp}<br>Angriff: ${totalAtk()}<br>Rüstung: ${totalArmor()}<br>Gold: ${S.gold}<br>Besiegte Wölfe: ${S.kills}</div>`;
+ }else{
+   pc.innerHTML=`<h2>Wölfe im Wald</h2><div class="item">Die Schattenwölfe rücken an Grünwald heran.<br><br>Fortschritt: ${Math.min(S.kills,5)}/5<br>${S.kills>=5?"<b style='color:#35cc57'>Abgeschlossen ✓</b>":"Belohnung: 25 Gold + Erfahrung"}</div>`;
+ }
+ panel.style.display="block";
+});
+window.toggleEquip=id=>{let i=S.inv.find(x=>x.id===id);if(i){i.equipped=!i.equipped;save();document.querySelector('[data-panel="inventory"]').click()}};
+
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
