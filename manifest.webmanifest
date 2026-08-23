@@ -1,1 +1,9 @@
-{"name":"Grünwald RPG","short_name":"Grünwald","start_url":"./","display":"standalone","background_color":"#080a08","theme_color":"#080a08","orientation":"portrait"}
+{
+  "name":"Grünwald RPG",
+  "short_name":"Grünwald",
+  "start_url":"./index.html",
+  "display":"standalone",
+  "background_color":"#080a08",
+  "theme_color":"#080a08",
+  "orientation":"portrait"
+}
